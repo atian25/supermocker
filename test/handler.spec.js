@@ -93,9 +93,10 @@ describe('handler', function(){
       rule = {
         type: 'custom',
         fn: [
+          'var URL = require("url");',
           'var obj = {};',
           'obj.header = req.headers["test"];',
-          'obj.url = req.url;',
+          'obj.url = URL.resolve(req.url, "app");',
           'res.header("h1", "v1");',
           'res.status(201);',
           'res.json(obj);'
@@ -103,7 +104,7 @@ describe('handler', function(){
       }
     });
 
-    it.only('should return custom', function(done){
+    it('should return custom', function(done){
       app.get('/', function(req, res, next){
         handler.custom(rule, req, res, next);
       });
@@ -115,7 +116,39 @@ describe('handler', function(){
         .end(function(err, res){
           expect(err).to.not.be.ok;
           expect(res.body.header).to.equal('testvalue');
-          expect(res.body.url).to.equal('/');
+          expect(res.body.url).to.equal('/app');
+          done(err);
+        });
+    });
+  });
+
+  describe('redirect', function(){
+    var testServer;
+    beforeEach(function(){
+      rule = {
+        type: 'redirect',
+        redirectUrl: 'http://localhost:6789/test'
+      }
+    });
+
+    it.only('should return redirect', function(done){
+      app.all('/', function(req, res, next){
+        handler.redirect(rule, req, res, next);
+      });
+
+      app.all('/test', function(req, res, next){
+        handler.echo(rule, req, res, next);
+      });
+
+      testServer = app.listen(6789);
+
+      request(app).post('/')
+        .send({"test": "value"})
+        .end(function(err, res){
+          expect(err).to.not.be.ok;
+          expect(res.body.req.json).to.deep.equal({"test": "value"});
+          //expect(res.body.url).to.equal('/app');
+          testServer.close();
           done(err);
         });
     });
