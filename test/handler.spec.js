@@ -1,5 +1,6 @@
 var request = require('supertest');
 var express = require('express');
+var bodyParser = require('body-parser');
 var expect = require('chai').expect;
 
 var handler = require('../lib/handler');
@@ -127,11 +128,24 @@ describe('handler', function(){
     beforeEach(function(){
       rule = {
         type: 'redirect',
-        redirectUrl: 'http://localhost:6789/test'
+        redirectUrl: 'http://localhost:6789/test',
+        statusCode: 201,
+        additionalRequestHeaders: [
+          {key: 'ah1', value: 'av1', disabled: false},
+          {key: 'ah2', value: 'av2', disabled: true},
+          {key: 'ah3', value: 'av3'}
+        ],
+        headers: [
+          {key: 'h1', value: 'v1', disabled: false},
+          {key: 'h2', value: 'v2', disabled: true},
+          {key: 'h3', value: 'v3'}
+        ]
       }
     });
 
-    it.only('should return redirect', function(done){
+    it('should return redirect', function(done){
+      app.use(bodyParser.json());
+      app.use(bodyParser.urlencoded());
       app.all('/', function(req, res, next){
         handler.redirect(rule, req, res, next);
       });
@@ -147,7 +161,12 @@ describe('handler', function(){
         .end(function(err, res){
           expect(err).to.not.be.ok;
           expect(res.body.req.json).to.deep.equal({"test": "value"});
-          //expect(res.body.url).to.equal('/app');
+          expect(res.body.req.headers.ah1).to.equal('av1');
+          expect(res.body.req.headers.ah2).to.be.undefined;
+          expect(res.body.req.headers.ah3).to.equal('av3');
+          expect(res.get("h1")).to.equal('v1');
+          expect(res.get("h2")).to.be.undefined;
+          expect(res.get("h3")).to.equal('v3');
           testServer.close();
           done(err);
         });
