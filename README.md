@@ -1,0 +1,3 @@
+## supermocker
+
+ a dynamic mocker.

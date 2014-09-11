@@ -1,0 +1,9 @@
+/.tmp
+/bower_components
+/files
+/node_modules
+/dist
+/npm-debug.log
+/public/components
+/*.iml
+/.idea
