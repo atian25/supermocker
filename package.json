@@ -2,24 +2,27 @@
   "name": "supermock",
   "version": "0.0.3",
   "description": "dynamic mocker",
-  "main": "index.js",
-  "scripts": {
-    "test": "npm test"
+  "author": {
+    "name": "TZ",
+    "email": "atian25@qq.com"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/atian25/supermock"
   },
+  "dependencies": {
+    "debug": "^2.0.0",
+    "lowdb": "^0.4.0",
+    "request": "^2.42.0",
+    "underscore.db": "^0.7.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
   "keywords": [
     "mocker"
   ],
-  "author": {
-    "name": "TZ",
-    "email": "atian25@qq.com"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/atian25/supermock/issues"
-  },
-  "homepage": "https://github.com/atian25/supermock"
+  "homepage": "https://github.com/atian25/supermock",
+  "license": "MIT"
 }
