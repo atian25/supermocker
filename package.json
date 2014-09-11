@@ -13,8 +13,15 @@
   "dependencies": {
     "debug": "^2.0.0",
     "lowdb": "^0.4.0",
+    "mockjs": "^0.1.4",
     "request": "^2.42.0",
     "underscore.db": "^0.7.0"
+  },
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "express": "^4.9.0",
+    "mocha": "^1.21.4",
+    "supertest": "^0.13.0"
   },
   "main": "index.js",
   "scripts": {
@@ -24,9 +31,5 @@
     "mocker"
   ],
   "homepage": "https://github.com/atian25/supermock",
-  "license": "MIT",
-  "devDependencies": {
-    "chai": "^1.9.1",
-    "mocha": "^1.21.4"
-  }
+  "license": "MIT"
 }
