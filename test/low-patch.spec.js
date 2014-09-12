@@ -46,8 +46,8 @@ describe('low-patch', function(){
     expect(db.query().value().length).to.equal(3);
   });
 
-  it('should reorder', function(){
-    var list = db.reorder(['1', '2', '3']).value();
+  it('should sort by idArr', function(){
+    var list = db.sortById(['1', '2', '3']).value();
     var nameList = list.map(function(item){
       return item.name;
     });
