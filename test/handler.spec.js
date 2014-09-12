@@ -2,14 +2,44 @@ var request = require('supertest');
 var express = require('express');
 var bodyParser = require('body-parser');
 var expect = require('chai').expect;
+var sinon = require('sinon');
 
-var handler = require('../lib/handler');
+var Handler = require('../lib/handler');
 
 describe('handler', function(){
   var app;
   var rule;
   beforeEach(function(){
     app = express();
+  });
+
+  describe('get', function(){
+    it('should get correct handler', function(){
+      expect(Handler.get({type: 'default'})).to.equal(Handler.echo);
+      expect(Handler.get({type: 'echo'})).to.equal(Handler.echo);
+      expect(Handler.get({type: 'static'})).to.equal(Handler.static);
+      expect(Handler.get({type: 'mockjs'})).to.equal(Handler.mockjs);
+      expect(Handler.get({type: 'redirect'})).to.equal(Handler.redirect);
+      expect(Handler.get({type: 'custom'})).to.equal(Handler.custom);
+    });
+
+    it('should delay', function(){
+      var rule = {
+        type: 'custom',
+        delay: 3000,
+        fn: [
+          'req.result="ok";'
+        ].join('\n')
+      };
+      var req = {};
+      var middleware = Handler.get(rule);
+      var clock = sinon.useFakeTimers();
+      middleware(req);
+      expect(req.result).to.be.undefined;
+      clock.tick(5000);
+      expect(req.result).to.equal('ok');
+      clock.restore();
+    });
   });
 
   describe('static', function(){
@@ -28,7 +58,7 @@ describe('handler', function(){
 
     it('should return static', function(done){
       app.get('/', function(req, res, next){
-        handler.static(rule, req, res, next);
+        Handler.static(rule, req, res, next);
       });
       request(app).get('/')
         .expect(201)
@@ -45,7 +75,7 @@ describe('handler', function(){
     it('should pass to next', function(done){
       rule.data = undefined;
       app.get('/', function(req, res, next){
-        handler.static(rule, req, res, next);
+        Handler.static(rule, req, res, next);
       });
       app.get('/', function(req, res){
         res.json({'test': 'ok'});
@@ -73,7 +103,7 @@ describe('handler', function(){
 
     it('should return mockjs', function(done){
       app.get('/', function(req, res, next){
-        handler.mockjs(rule, req, res, next);
+        Handler.mockjs(rule, req, res, next);
       });
       request(app).get('/')
         .expect(201)
@@ -107,7 +137,7 @@ describe('handler', function(){
 
     it('should return custom', function(done){
       app.get('/', function(req, res, next){
-        handler.custom(rule, req, res, next);
+        Handler.custom(rule, req, res, next);
       });
       request(app).get('/')
         .set('test', 'testvalue')
@@ -147,11 +177,11 @@ describe('handler', function(){
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded());
       app.all('/', function(req, res, next){
-        handler.redirect(rule, req, res, next);
+        Handler.redirect(rule, req, res, next);
       });
 
       app.all('/test', function(req, res, next){
-        handler.echo(rule, req, res, next);
+        Handler.echo(rule, req, res, next);
       });
 
       testServer = app.listen(6789);
