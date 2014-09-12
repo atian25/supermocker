@@ -1,5 +1,6 @@
-## supermocker
+## SuperMocker
 
  a dynamic mocker.
 
-[![Build Status](https://travis-ci.org/atian25/supermock.svg)](https://travis-ci.org/atian25/supermock)
+[![NPM](https://nodei.co/npm/supermocker.png)](https://nodei.co/npm/supermocker/)
+[![Build Status](https://travis-ci.org/atian25/supermocker.svg)](https://travis-ci.org/atian25/supermocker)
