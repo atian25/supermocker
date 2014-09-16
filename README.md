@@ -21,3 +21,15 @@ var mocker = new Mocker('./files/db.json');
 
 //var middlewares = mocker.getMiddlewares();
 ```
+
+## TODO
+[] change `request` to `superagent`
+[] support remove headers
+
+
+## History
+### v0.0.8
+-
+
+### v0.0.5
+- init project

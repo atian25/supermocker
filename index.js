@@ -1,1 +1,1 @@
-module.exports = require('./lib/supermocker');
+module.exports = require('./lib/mocker');
