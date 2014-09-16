@@ -9,19 +9,64 @@ var Handler = require('../lib/handler');
 describe('handler', function(){
   var app;
   var rule;
+
   beforeEach(function(){
     app = express();
   });
 
   describe('get', function(){
-    //it.only('should get correct handler', function(){
-    //  expect(Handler.get({type: 'default'})()).to.equal(Handler.echo);
-    //  expect(Handler.get({type: 'echo'})()).to.equal(Handler.echo);
-    //  expect(Handler.get({type: 'static'})()).to.equal(Handler.static);
-    //  expect(Handler.get({type: 'mockjs'})()).to.equal(Handler.mockjs);
-    //  expect(Handler.get({type: 'redirect'})()).to.equal(Handler.redirect);
-    //  expect(Handler.get({type: 'custom'})()).to.equal(Handler.custom);
-    //});
+    var spy;
+    afterEach(function(){
+      if(spy){
+        spy.restore();
+      }
+    });
+
+    it('should get correct handler', function(){
+      ['echo', 'static', 'mockjs', 'redirect', 'custom'].forEach(function(type){
+        spy = sinon.stub(Handler, type);
+        var rule = {type: type};
+        var middleware = Handler.get(rule);
+        middleware();
+        sinon.assert.calledOnce(spy);
+        spy.reset();
+        spy.restore();
+      });
+    });
+
+    it('should return echo as default', function(){
+      spy = sinon.stub(Handler, 'echo');
+      var rule = {type: 'default'};
+      var middleware = Handler.get(rule);
+      middleware();
+      sinon.assert.calledOnce(spy);
+    });
+
+    it('should disabled', function(){
+      spy = sinon.stub(Handler, 'echo');
+      var next = sinon.spy();
+      var rule = {
+        type: 'echo',
+        disabled: true
+      };
+      var middleware = Handler.get(rule);
+      middleware({}, {json: function(){}}, next);
+      sinon.assert.calledOnce(next);
+      sinon.assert.notCalled(spy);
+    });
+
+    it('should enable', function(){
+      spy = sinon.stub(Handler, 'echo');
+      var next = sinon.spy();
+      var rule = {
+        type: 'echo',
+        disabled: false
+      };
+      var middleware = Handler.get(rule);
+      middleware({}, {}, next);
+      sinon.assert.notCalled(next);
+      sinon.assert.calledOnce(spy);
+    });
 
     it('should delay', function(){
       var rule = {
@@ -58,7 +103,7 @@ describe('handler', function(){
 
     it('should return static', function(done){
       app.get('/', function(req, res, next){
-        Handler.static(rule, req, res, next);
+        Handler.static(req, res, next, rule);
       });
       request(app).get('/')
         .expect(201)
@@ -75,7 +120,7 @@ describe('handler', function(){
     it('should pass to next', function(done){
       rule.data = undefined;
       app.get('/', function(req, res, next){
-        Handler.static(rule, req, res, next);
+        Handler.static(req, res, next, rule);
       });
       app.get('/', function(req, res){
         res.json({'test': 'ok'});
@@ -103,7 +148,7 @@ describe('handler', function(){
 
     it('should return mockjs', function(done){
       app.get('/', function(req, res, next){
-        Handler.mockjs(rule, req, res, next);
+        Handler.mockjs(req, res, next, rule);
       });
       request(app).get('/')
         .expect(201)
@@ -137,7 +182,7 @@ describe('handler', function(){
 
     it('should return custom', function(done){
       app.get('/', function(req, res, next){
-        Handler.custom(rule, req, res, next);
+        Handler.custom(req, res, next, rule);
       });
       request(app).get('/')
         .set('test', 'testvalue')
@@ -177,7 +222,7 @@ describe('handler', function(){
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded());
       app.all('/', function(req, res, next){
-        Handler.redirect(rule, req, res, next);
+        Handler.redirect(req, res, next, rule);
       });
 
       app.all('/test', function(req, res, next){
@@ -212,7 +257,7 @@ describe('handler', function(){
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded());
       app.all('/interface/*', function(req, res, next){
-        Handler.redirect(rule, req, res, next);
+        Handler.redirect(req, res, next, rule);
       });
 
       app.all('/target/test', function(req, res, next){

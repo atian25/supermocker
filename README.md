@@ -25,6 +25,7 @@ var mocker = new Mocker('./files/db.json');
 ## TODO
 [] change `request` to `superagent`
 [] support remove headers
+[] remove namespace
 
 
 ## History
