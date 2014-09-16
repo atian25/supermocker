@@ -205,5 +205,40 @@ describe('handler', function(){
           done(err);
         });
     });
+
+    it('should redirect *', function(done){
+      rule.redirectUrl = 'http://localhost:6789/target';
+
+      app.use(bodyParser.json());
+      app.use(bodyParser.urlencoded());
+      app.all('/interface/*', function(req, res, next){
+        Handler.redirect(rule, req, res, next);
+      });
+
+      app.all('/target/test', function(req, res, next){
+        res.json({
+          data: req.body,
+          headers: req.headers,
+          method: req.method
+        });
+      });
+
+      testServer = app.listen(6789);
+
+      request(app).post('/interface/test')
+        .send({"test": "value"})
+        .end(function(err, res){
+          expect(err).to.not.be.ok;
+          expect(res.body.data).to.deep.equal({"test": "value"});
+          expect(res.body.headers.ah1).to.equal('av1');
+          expect(res.body.headers.ah2).to.be.undefined;
+          expect(res.body.headers.ah3).to.equal('av3');
+          expect(res.get("h1")).to.equal('v1');
+          expect(res.get("h2")).to.be.undefined;
+          expect(res.get("h3")).to.equal('v3');
+          testServer.close();
+          done(err);
+        });
+    });
   });
 });
