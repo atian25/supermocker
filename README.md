@@ -13,7 +13,7 @@ $ npm install supermocker --save
 
 ```js
 var Mocker = require('supermocker')
-var mocker = new Mocker('./files/db.json');
+var mocker = Mocker('./files/db.json');
 
 //mocker.namespaces.value();
 //mocker.rules.value();
@@ -26,6 +26,7 @@ var mocker = new Mocker('./files/db.json');
 [] change `request` to `superagent`
 [] support remove headers
 [] remove namespace
+[] sortById -> sortById(idArr, whereArr)
 
 
 ## History
