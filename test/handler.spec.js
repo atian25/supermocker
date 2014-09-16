@@ -12,6 +12,7 @@ describe('handler', function(){
 
   beforeEach(function(){
     app = express();
+    app.use(bodyParser.json());
   });
 
   describe('get', function(){
@@ -219,8 +220,6 @@ describe('handler', function(){
     });
 
     it('should return redirect', function(done){
-      app.use(bodyParser.json());
-      app.use(bodyParser.urlencoded());
       app.all('/', function(req, res, next){
         Handler.redirect(req, res, next, rule);
       });
@@ -254,8 +253,6 @@ describe('handler', function(){
     it('should redirect *', function(done){
       rule.redirectUrl = 'http://localhost:6789/target';
 
-      app.use(bodyParser.json());
-      app.use(bodyParser.urlencoded());
       app.all('/interface/*', function(req, res, next){
         Handler.redirect(req, res, next, rule);
       });
