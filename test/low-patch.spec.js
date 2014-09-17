@@ -1,4 +1,7 @@
 var expect = require('chai').expect;
+var rimraf = require('rimraf');
+var fs = require('fs');
+var path = require('path');
 var low = require('../lib/low-patch');
 
 describe('low-patch', function(){
@@ -7,6 +10,18 @@ describe('low-patch', function(){
     db = low()('db');
     var data = [{id:'1', name:'name1', type: 'static'}, {id:'3', name:'name3', type: 'static'}, {id:'2', name:'name2'}];
     db.push.apply(db, data);
+  });
+
+  it('should mkdir', function(){
+    var testDir = './test/' + new Date().getTime();
+    var fileName = testDir + '/db.json';
+    if (fs.existsSync(testDir)) {
+      rimraf.sync(testDir);
+    }
+    low(fileName);
+    expect(fs.existsSync(testDir));
+    expect(fs.existsSync(fileName));
+    rimraf.sync(testDir);
   });
 
   it('should createId with increase number', function(){
