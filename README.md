@@ -13,7 +13,7 @@ $ npm install supermocker --save
 
 ```js
 var Mocker = require('supermocker')
-var mocker = Mocker('./files/db.json');
+var mocker = new Mocker('./files/db.json');
 
 //database, using `loadash` method
 mocker.namespaces.value();

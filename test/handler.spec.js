@@ -219,7 +219,7 @@ describe('handler', function(){
       }
     });
 
-    it.only('should return redirect', function(done){
+    it('should return redirect', function(done){
       app.all('/', function(req, res, next){
         Handler.redirect(req, res, next, rule);
       });
@@ -248,7 +248,7 @@ describe('handler', function(){
           expect(res.get("h2")).to.be.undefined;
           expect(res.get("h3")).to.equal('v3');
           expect(res.get("h4")).to.equal('v4');
-          
+
           testServer.close();
           done(err);
         });
