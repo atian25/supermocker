@@ -219,12 +219,14 @@ describe('handler', function(){
       }
     });
 
-    it('should return redirect', function(done){
+    it.only('should return redirect', function(done){
       app.all('/', function(req, res, next){
         Handler.redirect(req, res, next, rule);
       });
 
       app.all('/test', function(req, res, next){
+        res.set('h4', 'v4');
+        res.set('h3', 'v33');
         res.json({
           data: req.body,
           headers: req.headers,
@@ -245,6 +247,8 @@ describe('handler', function(){
           expect(res.get("h1")).to.equal('v1');
           expect(res.get("h2")).to.be.undefined;
           expect(res.get("h3")).to.equal('v3');
+          expect(res.get("h4")).to.equal('v4');
+          
           testServer.close();
           done(err);
         });
