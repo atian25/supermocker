@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/atian25/supermock"
+    "url": "git://github.com/atian25/supermocker"
   },
   "dependencies": {
     "debug": "^2.0.0",
@@ -34,6 +34,6 @@
   "keywords": [
     "mocker"
   ],
-  "homepage": "https://github.com/atian25/supermock",
+  "homepage": "https://github.com/atian25/supermocker",
   "license": "MIT"
 }
