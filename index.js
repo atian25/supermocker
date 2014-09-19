@@ -1,1 +1,1 @@
-module.exports = require('./lib/mocker');
+module.exports = process.env.LIB_COV ? require('./lib-cov/mocker') : require('./lib/mocker');

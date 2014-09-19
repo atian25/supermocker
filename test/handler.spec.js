@@ -28,7 +28,7 @@ describe('handler', function(){
         spy = sinon.stub(Handler, type);
         var rule = {type: type};
         var middleware = Handler.get(rule);
-        middleware();
+        middleware({});
         sinon.assert.calledOnce(spy);
         spy.reset();
         spy.restore();
@@ -39,7 +39,7 @@ describe('handler', function(){
       spy = sinon.stub(Handler, 'echo');
       var rule = {type: 'default'};
       var middleware = Handler.get(rule);
-      middleware();
+      middleware({});
       sinon.assert.calledOnce(spy);
     });
 
