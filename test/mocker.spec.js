@@ -2,6 +2,7 @@ var expect = require('chai').expect;
 var request = require('supertest');
 var sinon = require('sinon');
 var express = require('express');
+var _ = require('lodash');
 var Mocker = require('../lib/mocker');
 
 
@@ -68,6 +69,7 @@ describe('mocker', function(){
       var space = mocker.addSpace('test');
       var group1 = mocker.addGroup(space.id, 'group1');
       var group2 = mocker.addGroup(space.id, 'group2');
+      var group3 = mocker.addGroup(space.id, 'group3');
       var rule1 = mocker.addRule(group1.id, {path: 'rule11'});
       var rule2 = mocker.addRule(group1.id, {path: 'rule12'});
       var rule3 = mocker.addRule(group2.id, {path: 'rule21'});
@@ -75,8 +77,8 @@ describe('mocker', function(){
       var detail = mocker.getSpaceDetail(space.id);
       expect(detail).to.eql({
         space: space,
-        groups: [group1, group2],
-        rules: [rule1, rule2, rule3]
+        groups: [group1, group2, group3],
+        rules: [[rule1, rule2], [rule3], []]
       });
       expect(spy.callCount).to.equal(0);
     });
@@ -216,47 +218,97 @@ describe('mocker', function(){
     });
   });
 
-  describe('router', function(){
+  describe('router op', function(){
     var mocker;
     var app;
     beforeEach(function(){
       mocker = new Mocker();
       app = express();
-
-      app.get('/', mocker.router);
-      var space1 = mocker.addSpace('test1');
-      var space2 = mocker.addSpace('test2');
+      app.use('/mock', mocker.router);
+      var space1 = mocker.addSpace('space1');
+      var space2 = mocker.addSpace('space2');
       var group1 = mocker.addGroup(space1.id, 'group1');
       var group2 = mocker.addGroup(space1.id, 'group2');
       var group3 = mocker.addGroup(space2.id, 'group3');
-      var rule1 = mocker.addRule(group1.id, {path: 'rule11', data:'{msg:"rule11"}'});
-      var rule2 = mocker.addRule(group1.id, {path: 'rule12', data:'{msg:"rule12"}'});
-      var rule3 = mocker.addRule(group2.id, {path: 'rule21', data:'{msg:"rule21"}'});
+      var rule111 = mocker.addRule(group1.id, {path: 'rule111', method: 'get', data:'{"msg":"/space1/rule111"}'});
+      var rule112 = mocker.addRule(group1.id, {path: 'rule112', data:'{"msg":"/space1/rule112"}'});
+      var rule121 = mocker.addRule(group2.id, {path: 'rule121', data:'{"msg":"/space1/rule121"}'});
+      var rule231 = mocker.addRule(group3.id, {path: 'rule231', data:'{"msg":"/space2/rule231"}'});
     });
-    it.only('should mapping router', function(done){
-      //var spy = sinon.stub(mocker, 'refreshRouter');
-      var clock = sinon.useFakeTimers();
 
-      mocker.router.use(function(req, res, next){
-        next();
-      })
-      clock.tick(500);
-      //spy.reset();
-      request(app).get('/test1/rule11').expect('{msg:"rule11"}').end(function(err){
-        if(err) return done(err);
-        request(app).get('/test1/rule12').expect('{msg:"rule12"}').end(function(err){
+    it('should mount sub router', function(done){
+      var space1 = express.Router();
+      var space2 = express.Router();
+      var group1 = express.Router();
+      var group2 = express.Router();
+
+      app.use('/space1', space1);
+      app.use('/space2', space2);
+
+      space1.use('/group1', group1);
+      space2.use('/group2', group2);
+
+      group1.get('/rule11', function(req, res, next){
+        res.end('space1.group1.rule11');
+      });
+
+      group1.get('/rule12', function(req, res, next){
+        res.end('space1.group1.rule12');
+      });
+
+      group2.get('/rule21', function(req, res, next){
+        res.end('space2.group2.rule21');
+      });
+
+      request(app).get('/space1/group1/rule11')
+        .expect('space1.group1.rule11')
+        .end(function(err){
           if(err) return done(err);
-          request(app).get('/test2/rule21').expect('{msg:"rule21"}').end(function(err) {
+          request(app).get('/space1/group1/rule12')
+            .expect('space1.group1.rule12')
+            .end(function(err){
+              if(err) return done(err);
+              request(app).get('/space2/group2/rule21')
+                .expect('space2.group2.rule21')
+                .end(function(err){
+                  if(err) return done(err);
+                  request(app).get('/space2/group2/rule2222')
+                    .expect(404)
+                    .end(function(err){
+                      done(err);
+                    });
+                });
+            });
+        });
+    });
+
+    it('should mapping router', function(done){
+      setTimeout(function(){
+        request(app).get('/mock/space1/rule111').expect('{"msg":"/space1/rule111"}').end(function(err){
+          if(err) return done(err);
+          request(app).get('/mock/space1/rule112').expect('{"msg":"/space1/rule112"}').end(function(err){
+            if(err) return done(err);
+            request(app).get('/mock/space1/rule121').expect('{"msg":"/space1/rule121"}').end(function(err) {
+              if(err) return done(err);
+              request(app).get('/mock/space2/rule231').expect('{"msg":"/space2/rule231"}').end(function(err) {
+                done(err);
+              });
+            });
+          });
+        });
+      }, 150);
+    });
+
+    it('should got 404', function(done){
+      mocker.removeRule('1', '1');
+      setTimeout(function(){
+        request(app).get('/mock/space1/rule111').expect(404).end(function(err){
+          if(err) return done(err);
+          request(app).get('/mock/space1/rule112').expect('{"msg":"/space1/rule112"}').end(function(err){
             done(err);
           });
         });
-      });
-
-      //mocker.removeRule(1, group1.id);
-      //expect(spy.callCount).to.equal(1);
-      //clock.tick(500);
-      //request(app).get('/test1/rule11').expect('{msg:"rule21"}').end();
-      //expect(spy.callCount).to.equal(2);
+      }, 150);
     });
   });
 });
