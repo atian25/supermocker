@@ -182,9 +182,9 @@ describe('mocker', function(){
 
     it('should add', function () {
       var rule1 = mocker.addRule(group.id, {path: 'rule1'});
-      var rule2 = mocker.addRule(group.id, {path: 'rule2', method: 'POST'});
-      expect(rule1).to.deep.equal({id: '1', path: 'rule1', type:'static', method: 'all'});
-      expect(rule2).to.deep.equal({id: '2', path: 'rule2', type:'static', method: 'post'});
+      var rule2 = mocker.addRule(group.id, {path: 'rule2', method: 'post'});
+      expect(rule1).to.deep.equal({id: '1', path: 'rule1', type:'static', method: 'ALL'});
+      expect(rule2).to.deep.equal({id: '2', path: 'rule2', type:'static', method: 'POST'});
       expect(group.ruleIds).to.deep.equal([rule1.id, rule2.id]);
       expect(spy.callCount).to.equal(2);
       //with index
@@ -200,8 +200,8 @@ describe('mocker', function(){
     it('should update', function(){
       var rule1 = mocker.addRule(group.id, {path: 'rule1'});
       spy.reset();
-      var rule2 = mocker.updateRule({id: rule1.id, path: 'rule2', method: 'POST'});
-      expect(rule2).to.deep.equals({id: '1', path: 'rule2', type:'static', method: 'post'});
+      var rule2 = mocker.updateRule({id: rule1.id, path: 'rule2', method: 'post'});
+      expect(rule2).to.deep.equals({id: '1', path: 'rule2', type:'static', method: 'POST'});
       expect(spy.callCount).to.equal(1);
     });
 
