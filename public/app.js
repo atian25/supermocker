@@ -20,6 +20,7 @@ app.controller('mainCtrl', ['$http', function($http){
       $http.get('/space/' + vm.currentSpace.id).success(function (data){
         vm.currentGroups = data.groups;
         vm.currentRules = data.rules;
+        vm.editRule(vm.currentRules[0][0], vm.currentGroups[0], 0);
       });
     }
   };
@@ -64,4 +65,114 @@ app.controller('mainCtrl', ['$http', function($http){
       vm.isEditingSpace = false;
     });
   };
+
+  vm.ruleTypeEnum = [
+    {name: '静态数据', value: 'static', fields:['headers', 'statusCode', 'data']},
+    {name: '动态模拟数据', value: 'mockjs',fields:['headers', 'statusCode', 'data']},
+    {name: '重定向', value: 'redirect', fields:['headers', 'statusCode', 'redirectUrl', 'additionalRequestHeaders']},
+    {name: '自定义函数', value: 'custom', fields:['fn']}
+  ];
+  vm.allRuleFields = ['headers', 'statusCode', 'data', 'redirectUrl', 'additionalRequestHeaders', 'fn'];
+  vm.ruleFields = {};
+
+  vm.changeRuleType = function(type){
+    vm.currentRuleType = _.find(vm.ruleTypeEnum, {value: type});
+    //只显示指定的数据
+    vm.ruleFields = _.reduce(vm.currentRuleType.fields, function(sum, item){
+      sum[item] = true;
+      return sum;
+    }, {});
+  };
+  vm.editRule = function(item, group, groupIndex){
+    vm.currentGroup = group;
+    vm.groupIndex = groupIndex;
+    if(item) {
+      vm.currentRule = JSON.parse(JSON.stringify(item));
+    }else{
+      vm.currentRule = {
+        method: 'ALL',
+        type: 'static',
+        data: '{\n\t\n}',
+        fn: '//just like express middleware, but not need to write `function(req, res, next){}`\n'
+      };
+    }
+    vm.resetRule = JSON.parse(JSON.stringify(vm.currentRule));
+    vm.changeRuleType(vm.currentRule.type);
+  };
+
+  vm.cancelEditRule = function(){
+    vm.currentRule = JSON.parse(JSON.stringify(vm.resetRule));
+  };
+
+  vm.saveRule = function(){
+    if(vm.currentRule.path.indexOf('/')==0){
+      vm.currentRule.path = vm.currentRule.path.substring(1);
+    }
+    var skipKey = _.difference(vm.allRuleFields, vm.currentRuleType.fields);
+    var obj = {
+      groupId: vm.currentGroup.id,
+      rule: _.omit(vm.currentRule, skipKey)
+    };
+    $http.post('/rule/' + (obj.rule.id || ''), obj).success(function(response){
+      var ruleList = vm.currentRules[vm.groupIndex];
+      if(!vm.currentRule.id){
+        ruleList.push(response);
+      }else{
+        var index = _.findIndex(ruleList, function(obj){
+          return obj.id == response.id;
+        });
+        if(index!=-1){
+          ruleList[index] = response;
+        }
+      }
+      vm.editRule(response, vm.currentGroup, vm.groupIndex);
+    });
+  };
+
+  vm.toggleRule = function(item){
+    item.disabled = !item.disabled;
+    console.log(item)
+    Rule.post(item).then(function(response){
+      var index = _.findIndex(vm.ruleList, function(obj){
+        return obj.id == response.id;
+      });
+      if(index!=-1){
+        vm.ruleList[index] = response;
+      }
+      if(vm.currentRule && vm.currentRule.id == item.id){
+        vm.editRule(response);
+      }
+    });
+  };
+
+  vm.removeRule = function(item){
+    //vm.currentRule = Restangular.copy(item);
+    vm.ruleList.remove({id: item.id}).then(function(){
+      _.remove(vm.ruleList, function(obj){
+        return obj.id == item.id;
+      });
+      if(vm.currentRule && vm.currentRule.id == item.id){
+        vm.editRule();
+      }
+    });
+  };
+
+  vm.visitRule = function(item){
+    var url = '/proxy/' + item.namespace + '/' + item.path;
+    window.open(url, '_blank');
+    console.log(url);
+  };
+
+  //The ui-ace option
+  vm.aceOption = {
+    //theme:'twilight',
+    useWrapMode : true,
+    //showInvisibles: true,
+    mode: 'javascript', //json
+    onLoad: function (_ace) {
+      _ace.getSession().setTabSize(2);
+      _ace.getSession().setUseSoftTabs(true);
+    }
+  };
+
 }]);
