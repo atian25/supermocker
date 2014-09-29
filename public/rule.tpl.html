@@ -1,0 +1,121 @@
+<div class="panel panel-primary">
+  <div class="panel-heading">接口信息</div>
+  <!-- 保存与取消 -->
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="col-md-3">
+        <button type="button" class="btn btn-info navbar-btn" ng-click="vm.saveRule()">保存</button>
+        <button type="button" class="btn btn-default navbar-btn" ng-click="vm.cancelEditRule()">取消</button>
+      </div>
+    </div>
+  </nav>
+  <!-- 表单区域 -->
+  <div class="panel-body">
+    <form class="form-horizontal">
+      <!-- 第1行: 路径 -->
+      <div class="form-group">
+        <label class="col-md-1 control-label">路径:</label>
+        <div class="col-md-2">
+          <select ng-model="vm.currentRule.method" ng-options="item for item in ['ALL', 'GET', 'POST', 'PUT', 'DELETE']" class="form-control"> </select>
+        </div>
+        <div class="col-md-6" style="padding-left: 0px;">
+          <div class="input-group">
+            <span class="input-group-addon">/{{vm.currentNamespace.name}}/</span>
+            <input type="text" class="form-control" placeholder="路径" ng-model="vm.currentRule.path">
+          </div>
+        </div>
+        <div class="col-md-1">
+          <button type="button" class="btn btn-info btn-sm" ng-click="vm.visitRule(vm.currentRule)">
+            <span class="glyphicon glyphicon-send"></span> 测试访问
+          </button>
+        </div>
+      </div>
+
+      <!-- 第2行: 类型 -->
+      <div class="form-group">
+        <label class="col-md-1 control-label">类型:</label>
+        <div class="col-md-8">
+          <select ng-model="vm.currentRule.type" ng-change="vm.changeRuleType(vm.currentRule.type)"  ng-options="item.value as item.name for item in vm.ruleTypeEnum" class="form-control"> </select>
+        </div>
+      </div>
+
+      <!-- 第3行: 延迟返回 -->
+      <div class="form-group">
+        <label class="col-md-1 control-label">延迟:</label>
+        <div class="col-md-2">
+          <div class="input-group">
+            <input type="number" class="form-control" ng-model="vm.currentRule.delay">
+            <span class="input-group-addon">ms</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第4行: 状态码 -->
+      <div class="form-group" ng-if="vm.ruleFields.statusCode">
+        <label class="col-md-1 control-label">状态:</label>
+        <div class="col-md-2">
+            <input type="number" class="form-control" ng-model="vm.currentRule.statusCode" ng-minlength="3" ng-maxlength="3" placeholder="状态码" value="200">
+        </div>
+      </div>
+
+      <!-- 第5行: 重定向 -->
+      <div class="form-group" ng-if="vm.ruleFields.redirectUrl">
+        <label class="col-md-1 control-label">透传:</label>
+        <div class="col-md-8">
+          <input type="text" class="form-control" ng-model="vm.currentRule.redirectUrl" placeholder="重定向地址">
+        </div>
+      </div>
+
+      <!-- 第6行: Headers -->
+      <div class="form-group" ng-if="vm.ruleFields.headers">
+        <label class="col-md-1 control-label">Headers:</label>
+        <div class="col-md-7">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="key">
+            <span class="input-group-addon">
+              <span class="label label-info">:</span>
+            </span>
+            <input type="text" class="form-control" placeholder="value">
+          </div>
+        </div>
+
+        <div class="pull-left">
+          <button type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-ban-circle"></span> 禁用
+          </button>
+          <button type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-remove-circle"></span> 删除
+          </button>
+        </div>
+      </div>
+
+      <!-- 第8行: 数据 -->
+      <div class="form-group" ng-if="vm.ruleFields.data">
+        <label class="col-md-1 control-label">数据:</label>
+        <div class="col-md-8">
+          <div ui-ace="vm.aceOption" ng-model="vm.currentRule.data"></div>
+        </div>
+        <button type="button" class="btn btn-info btn-sm">
+          <span class="glyphicon glyphicon-th"></span> 格式化
+        </button>
+      </div>
+
+      <!-- 第9行: 自定义函数 -->
+      <div class="form-group" ng-if="vm.ruleFields.fn">
+        <label class="col-md-1 control-label">自定义:</label>
+        <div class="col-md-8">
+          <div ui-ace="vm.aceOption" ng-model="vm.currentRule.fn"></div>
+        </div>
+        <button type="button" class="btn btn-info btn-sm">
+          <span class="glyphicon glyphicon-th"></span> 格式化
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel-footer">
+    <span class="label label-info">by TZ...</span>
+  </div>
+
+
+</div>
