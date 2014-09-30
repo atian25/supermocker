@@ -1,12 +1,12 @@
 var express = require('express');
 var path = require('path');
-var logger = require('morgan');
+var morgan = require('morgan');
 var bodyParser = require('body-parser');
 
 var app = module.exports = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(logger('dev'));
+app.use(morgan('dev'));
 app.use(bodyParser.json({extended: true}));
 app.use(bodyParser.urlencoded({extended: true}));
 
