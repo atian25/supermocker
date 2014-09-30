@@ -11,22 +11,22 @@ $ npm install supermocker --save
 
 ### Quick Start
 
+```bash
+  npm install supermocker -g
+  supermocker
+```
+
+### Embed
 ```js
 var Mocker = require('supermocker')
-var mocker = new Mocker('./files/db.json');
-
-//database, using `loadash` method
-mocker.namespaces.value();
-mocker.rules.value();
-mocker.rules.insertOrUpdate({
-  type: 'static',
-  namespace: 'example',
-  path: 'static',
-  data: '{"mocker": "super"}'
+var mocker = new Mocker('./mocker.db');
+var app = express();
+app.use(function(req, res, next){
+  req.mocker = mocker;
+  next();
 });
-
-//collect rule handlers
-var middlewares = mocker.getMiddlewares();
+app.use('/', mocker.admin);
+app.use('/mocker', mocker.router);
 
 ```
 
@@ -39,51 +39,17 @@ var middlewares = mocker.getMiddlewares();
 ```
 
 
-### optional build-in router
-
-```js
-var app = require('express')();
-var router = require('supermocker/lib/router')('./files/db.json');
-
-//database, using `loadash` method
-var mocker = router.mocker;
-mocker.namespaces.value();
-mocker.rules.value();
-mocker.rules.insertOrUpdate({
-  id: 1,
-  type: 'static',
-  namespace: 'example',
-  path: 'static',
-  data: '{"mocker": "super"}'
-});
-router.refresh();
-
-//mocker to route
-app.use('/proxy', router.proxy);
-
-//visit `http://localhost:5000/proxy/example/static` in browser
-
-//admin
-//router.get('/', function(req, res) {
-//  res.sendfile('./public/proxy/index.html');
-//});
-//app.use('/admin/proxy', mocker);
-
-//start server
-app.listen(5000, function() {
-  console.log('supermocker server listening on port 5000');
-  console.log('visit http://localhost:5000/proxy/example/static');
-});
-```
-
 ### TODO
-- [ ] change `request` to `superagent`
+- [x] change `request` to `superagent`
 - [ ] support remove headers
-- [ ] remove namespace
-- [ ] sortById -> sortById(idArr, whereArr)
+- [ ] group action ui
 
 
 ### History
+#### v0.4.0
+  - big refactor
+  - `npm install supermocker -g`
+
 #### v0.0.9
   - change mocker exports to factory function
 
