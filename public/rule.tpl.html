@@ -1,5 +1,5 @@
 <div class="panel panel-primary">
-  <div class="panel-heading">Rule Info</div>
+  <div class="panel-heading"><span class="glyphicon glyphicon-bookmark"></span> Rule Info</div>
   <!-- 保存与取消 -->
   <nav class="navbar navbar-default">
     <div class="container-fluid">
@@ -21,7 +21,7 @@
         <div class="col-md-6" style="padding-left: 0px;">
           <div class="input-group">
             <span class="input-group-addon">/{{vm.currentSpace.path}}/</span>
-            <input type="text" class="form-control" placeholder="path" ng-model="vm.currentRule.path">
+            <input type="text" class="form-control" placeholder="path" ng-model="vm.currentRule.path" popover="can using express mapping"  popover-trigger="focus">
           </div>
         </div>
         <div class="col-md-1">

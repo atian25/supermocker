@@ -1,5 +1,5 @@
 "use strict";
-var app = angular.module('SuperMocker', ['ui.ace', 'ui.bootstrap']);
+var app = angular.module('SuperMocker', ['ui.ace', 'ui.bootstrap', 'ngDragDrop']);
 
 app.controller('mainCtrl', ['$http', function($http){
   var vm = this;
@@ -83,6 +83,7 @@ app.controller('mainCtrl', ['$http', function($http){
       return sum;
     }, {});
   };
+
   vm.editRule = function(item, group, groupIndex){
     vm.currentGroup = group;
     vm.groupIndex = groupIndex;
@@ -117,6 +118,8 @@ app.controller('mainCtrl', ['$http', function($http){
       var ruleList = vm.currentRules[vm.groupIndex];
       if(!vm.currentRule.id){
         ruleList.push(response);
+        vm.currentGroups[vm.groupIndex].ruleIds.push(response.id);
+        console.log(vm.currentGroups[vm.groupIndex])
       }else{
         var index = _.findIndex(ruleList, function(obj){
           return obj.id == response.id;
@@ -124,41 +127,59 @@ app.controller('mainCtrl', ['$http', function($http){
         if(index!=-1){
           ruleList[index] = response;
         }
-      }
+      };
       vm.editRule(response, vm.currentGroup, vm.groupIndex);
     });
   };
 
   vm.toggleRule = function(item){
     item.disabled = !item.disabled;
-    console.log(item)
-    Rule.post(item).then(function(response){
-      var index = _.findIndex(vm.ruleList, function(obj){
-        return obj.id == response.id;
-      });
-      if(index!=-1){
-        vm.ruleList[index] = response;
-      }
+    $http.post('/rule/' + (item.id || ''), {rule: item}).success(function(response){
       if(vm.currentRule && vm.currentRule.id == item.id){
         vm.editRule(response);
       }
     });
   };
 
-  vm.removeRule = function(item){
-    //vm.currentRule = Restangular.copy(item);
-    vm.ruleList.remove({id: item.id}).then(function(){
-      _.remove(vm.ruleList, function(obj){
-        return obj.id == item.id;
-      });
-      if(vm.currentRule && vm.currentRule.id == item.id){
+  vm.removeRule = function(item, index, group,  groupIndex){
+    $http.delete('/rule/' + vm.currentRule.id + '?groupId=' + group.id).success(function(data){
+      var ruleList = vm.currentRules[groupIndex];
+      ruleList.splice(index, 1);
+      vm.currentGroups[groupIndex].ruleIds.splice(index, 1);
+      if(vm.currentRule && vm.currentRule.id == item.id) {
         vm.editRule();
       }
     });
   };
 
+  vm.sortRule = function(groupId, ruleIds){
+    $http.post('/sort/rule', {
+      groupId: groupId,
+      ruleIds: ruleIds
+    }).success(function(data){
+    });
+  };
+
+  vm.onDropRuleSuccess = function(data, ruleIndex, groupIndex, $event){
+    var ruleList = vm.currentRules[groupIndex];
+    ruleList.splice(ruleIndex, 1);
+
+    var group = vm.currentGroups[groupIndex];
+    group.ruleIds.splice(ruleIndex, 1);
+    vm.sortRule(group.id, group.ruleIds);
+  };
+
+  vm.onDropRule = function(data, ruleIndex, groupIndex, $event){
+    var ruleList = vm.currentRules[groupIndex];
+    ruleList.splice(ruleIndex + 1, 0, data);
+
+    var group = vm.currentGroups[groupIndex];
+    group.ruleIds.splice(ruleIndex + 1, 0, data.id);
+    vm.sortRule(group.id, group.ruleIds);
+  };
+
   vm.visitRule = function(item){
-    var url = '/proxy/' + item.namespace + '/' + item.path;
+    var url = '/mocker/' + vm.currentSpace.path + '/' + item.path;
     window.open(url, '_blank');
     console.log(url);
   };

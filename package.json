@@ -33,11 +33,15 @@
   },
   "main": "index.js",
   "scripts": {
+    "start": "./bin/supermocker",
+    "postinstall": "./node_modules/bower install",
     "test": "./node_modules/.bin/mocha -R spec",
     "test-cov": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec"
   },
   "keywords": [
-    "mocker"
+    "mocker",
+    "dashboard",
+    "supermocker"
   ],
   "homepage": "https://github.com/atian25/supermocker",
   "license": "MIT"

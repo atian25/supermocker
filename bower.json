@@ -7,6 +7,7 @@
     "bootstrap": "~3.2.0",
     "angular-ui-bootstrap-bower": "~0.11.0",
     "angular-ui-ace": "~0.1.1",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "angular-native-dragdrop": "~1.0.3"
   }
 }

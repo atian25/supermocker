@@ -44,41 +44,7 @@
     </form>
     <hr>
 
-    <div ng-repeat="group in vm.currentGroups" ng-init="groupIndex = $index">
-      <div class="panel panel-info">
-        <div class="panel-heading">
-          <span class="glyphicon glyphicon-list"></span> {{group.name}}
-          <i class="glyphicon glyphicon-chevron-down pull-right"></i>
-          <div class="pull-right" style="margin-right: 10px;">
-            <div class="btn-group">
-              <button type="button" class="btn btn-default btn-xs" ng-click="vm.editRule(null, group, groupIndex);">
-                <span class="glyphicon glyphicon-plus"></span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <ul class="list-group">
-          <li class="list-group-item" ng-repeat="item in vm.currentRules[groupIndex]" ng-click="vm.editRule(item, group, groupIndex);">
-            <span class="label" style="margin-right: 10px;" ng-class="{'ALL': 'label-default', 'GET':'label-info','POST':'label-success','PUT':'label-warning','DELETE':'label-danger'}[item.method||'ALL']">
-              {{item.method||'ALL'}}
-            </span>
-            <span ng-if="!item.disabled">{{item.path}}</span>
-            <del ng-if="item.disabled" style="color:#808080;"><em>{{item.path}}</em></del>
-            <div class="pull-right action-buttons">
-              <button type="button" class="btn btn-info btn-xs" ng-click="vm.editRule(item, group, groupIndex); $event.stopPropagation();">
-                <span class="glyphicon glyphicon-edit"></span>
-              </button>
-              <button type="button" class="btn btn-default btn-xs" ng-class="{'btn-default': !item.disabled, 'btn-info': item.disabled}" ng-click="vm.toggleRule(item, group, groupIndex); $event.stopPropagation();">
-                <span class="glyphicon glyphicon-ban-circle"></span>
-              </button>
-              <button type="button" class="btn btn-warning btn-xs" ng-click="vm.removeRule(item, group, groupIndex); $event.stopPropagation();">
-                <span class="glyphicon glyphicon-trash"></span>
-              </button>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <div ng-include="'ruleList.tpl.html'"></div>
 
   </div>
 </div>
