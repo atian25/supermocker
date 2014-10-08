@@ -10,7 +10,7 @@ app.use(bodyParser.json({extended: true}));
 app.use(bodyParser.urlencoded({extended: true}));
 
 var Mocker = require('./lib/mocker');
-var mocker = new Mocker('./mocker.db');
+var mocker = new Mocker('./db/mocker.db');
 app.use(function(req, res, next){
   req.mocker = mocker;
   next();

@@ -6,17 +6,11 @@
 ### Installation
 
 ```bash
-$ npm install supermocker --save
-```
-
-### Quick Start
-
-```bash
   npm install supermocker -g
   supermocker
 ```
 
-### Embed
+### Embed Usage
 ```js
 var Mocker = require('supermocker')
 var mocker = new Mocker('./mocker.db');

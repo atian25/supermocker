@@ -2,11 +2,37 @@ var expect = require('chai').expect;
 var request = require('supertest');
 var sinon = require('sinon');
 var express = require('express');
+var fs = require('fs');
+var rimraf = require('rimraf');
 var _ = require('lodash');
 var Mocker = require('../lib/mocker');
 
 
-describe('mocker', function(){
+  describe('mocker', function(){
+  describe('db op', function(){
+    var mocker;
+    var dbPath = './test/test.db';
+    beforeEach(function(){
+      rimraf.sync(dbPath);
+      mocker = new Mocker(dbPath);
+    });
+    it('should save to disk', function(done){
+      var space1 = mocker.addSpace('test', 'des');
+      var group1 = mocker.addGroup(space1.id, 'group1');
+      var rule1 = mocker.addRule(group1.id, {path: 'rule1'});
+      setTimeout(function(){
+        var data = JSON.parse(fs.readFileSync(dbPath));
+        expect(data.spaces.length).to.equal(1);
+        expect(data.groups.length).to.equal(1);
+        expect(data.rules.length).to.equal(1);
+        done();
+      }, 100);
+    });
+    afterEach(function(){
+      rimraf.sync(dbPath);
+    });
+  });
+
   describe('space op', function(){
     var mocker;
     var spy;
