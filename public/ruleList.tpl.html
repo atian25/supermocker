@@ -15,7 +15,7 @@
     <ul class="list-group" collapse="isCollapsed">
       <li class="list-group-item"
           ng-if="vm.currentRules[groupIndex].length ===0"
-          ui-on-drop="vm.onDrop($event, $data, 0, groupIndex)">
+          ui-on-drop="vm.onDropRule($data, 0, groupIndex, $event)">
         <span class="text-muted">Empty</span>
       </li>
       <li class="list-group-item"
