@@ -6,9 +6,12 @@ var fs = require('fs');
 var rimraf = require('rimraf');
 var _ = require('lodash');
 var Mocker = require('../lib/mocker');
+var ddescribe = describe.only;
+var xdescribe = describe.skip;
+var iit = it.only;
+var xit = it.skip;
 
-
-  describe('mocker', function(){
+describe('mocker', function(){
   describe('db op', function(){
     var mocker;
     var dbPath = './test/test.db';
@@ -33,7 +36,7 @@ var Mocker = require('../lib/mocker');
     });
   });
 
-  describe('space op', function(){
+  ddescribe('space op', function(){
     var mocker;
     var spy;
     beforeEach(function(){
@@ -42,87 +45,78 @@ var Mocker = require('../lib/mocker');
     });
 
     it('should list', function(){
-      var space1 = mocker.addSpace('test', 'des');
-      var space2 = mocker.addSpace('test2', 'des2');
+      var space1 = mocker.updateSpace({path: 'test', description: 'des'});
+      var space2 = mocker.updateSpace({path: 'test2', description: 'des2'});
       spy.reset();
       var spaces = mocker.listSpace();
       expect(spaces).to.deep.equal([
-        {id: '1', path: 'test', "description": "des", groupIds: []},
-        {id: '2', path: 'test2', "description": "des2", groupIds: []}
+        {id: '1', path: 'test', "description": "des", groups: []},
+        {id: '2', path: 'test2', "description": "des2", groups: []}
       ]);
       expect(spy.callCount).to.equal(0);
     });
 
     it('should add', function(){
-      var space1 = mocker.addSpace('test', 'des');
-      var space2 = mocker.addSpace('test', 'des2');
-      expect(space1).to.deep.equal({id: '1', path: 'test', "description": "des", groupIds: []});
+      var space1 = mocker.updateSpace({path: 'test', description: 'des'});
+      var space2 = mocker.updateSpace({path: 'test', description: 'des2'});
+      expect(space1).to.deep.equal({id: '1', path: 'test', "description": "des", groups: []});
       expect(space2).to.be.falsy;
       expect(spy.callCount).to.equal(1);
     });
 
     it('should update', function(){
-      var space1 = mocker.addSpace('test', 'des');
-      var space2 = mocker.addSpace('test2', 'des2');
+      var space1 = mocker.updateSpace({path: 'test', description: 'des'});
+      var space2 = mocker.updateSpace({path: 'test2', description: 'des2'});
+
       //space's path is not allow to duplicate
       var space11 = mocker.updateSpace({id: '1', path: 'test2', description: 'des'});
       expect(space11).to.be.falsy;
       expect(spy.callCount).to.equal(2);
-      //space's groupIds is not allow to change
-      var space12 = mocker.updateSpace({id: '1', path: 'test3', description: 'des', groupIds: ['1', '2']});
-      expect(space12).to.deep.equal({id: '1', path: 'test3', "description": "des", groupIds: []});
-      expect(spy.callCount).to.equal(3);
+
       //change path
-      var space13 = mocker.updateSpace({id: '1', path: 'test4', description: 'des2'});
-      expect(space13).to.deep.equal({id: '1', path: 'test4', "description": "des2", groupIds: []});
+      var space12 = mocker.updateSpace({id: '1', path: 'test3', description: 'des2'});
+      expect(space12).to.deep.equal({id: '1', path: 'test3', "description": "des2", groups: []});
+      expect(spy.callCount).to.equal(3);
+
+      //replace
+      var space13 = mocker.updateSpace({id: '1', path: 'test4'}, true);
+      expect(space13).to.deep.equal({id: '1', path: 'test4', groups: []});
       expect(spy.callCount).to.equal(4);
+
+      //patch id
+      var space14 = mocker.updateSpace({path: 'test5', groups: [{name: 'group1'}, {name: 'group2', rules:[{path:'rule1'}, {path:'rule2'}]}]});
+      expect(space14).to.deep.equal({id: '3', path: 'test5', groups: [{id: '1', name: 'group1'}, {id: '2', name: 'group2', rules:[{id: '1', path:'rule1'}, {id: '2', path:'rule2'}]}]});
+      expect(spy.callCount).to.equal(5);
     });
 
     it('should remove', function(){
-      var space = mocker.addSpace('test', 'des');
-      var group = mocker.addGroup(space.id, 'group name');
-      mocker.addRule(group.id, {path: 'rule1'});
-      mocker.addRule(group.id, {path: 'rule2'});
+      var space1 = mocker.updateSpace({path: 'test', description: 'des'});
+      var space2 = mocker.updateSpace({path: 'test2', description: 'des2'});
       spy.reset();
-      mocker.removeSpace(space.id);
-      expect(mocker.spaces.value().length).to.equal(0);
-      expect(mocker.groups.value().length).to.equal(0);
-      expect(mocker.rules.value().length).to.equal(0);
+      mocker.removeSpace(space1.id);
+      expect(mocker.spaces.value().length).to.equal(1);
       expect(spy.callCount).to.equal(1);
     });
 
     it('should get detail', function(){
-      var space = mocker.addSpace('test');
-      var group1 = mocker.addGroup(space.id, 'group1');
-      var group2 = mocker.addGroup(space.id, 'group2');
-      var group3 = mocker.addGroup(space.id, 'group3');
-      var rule1 = mocker.addRule(group1.id, {path: 'rule11'});
-      var rule2 = mocker.addRule(group1.id, {path: 'rule12'});
-      var rule3 = mocker.addRule(group2.id, {path: 'rule21'});
+      var space = mocker.updateSpace({path: 'test', groups: [{name: 'group1'}, {name: 'group2', rules:[{path:'rule1'}, {path:'rule2'}]}]});
       spy.reset();
-      var detail = mocker.getSpaceDetail(space.id);
-      expect(detail).to.eql({
-        space: space,
-        groups: [group1, group2, group3],
-        rules: [[rule1, rule2], [rule3], []]
-      });
+      var detail = mocker.getSpace(space.id);
+      expect(detail).to.deep.equal({id: '1', path: 'test', groups: [{id: '1', name: 'group1'}, {id: '2', name: 'group2', rules:[{id: '1', path:'rule1'}, {id: '2', path:'rule2'}]}]});
       expect(spy.callCount).to.equal(0);
     });
 
     it('should sort', function () {
-      var space = mocker.addSpace('test');
-      var group1 = mocker.addGroup(space.id, 'group1');
-      var group2 = mocker.addGroup(space.id, 'group2');
-      var group3 = mocker.addGroup(space.id, 'group3');
+      var space = mocker.updateSpace({path: 'test', groups: [{name: 'group1'}, {name: 'group2', rules:[{path:'rule1'}, {path:'rule2'}]}, {name: 'group3'}]});
       spy.reset();
       //no allow to change
-      var space2 = mocker.sortGroup(space.id, [group2.id]);
-      expect(space.groupIds).to.eql([group1.id, group2.id, group3.id]);
-      expect(space2).to.be.undefined;
+      var space2 = mocker.sortGroup(space.id, ['3', '2']);
+      expect(_.pluck(space.groups, 'id')).to.eql(['1', '2', '3']);
+      expect(space2).to.be.falsy;
       expect(spy.callCount).to.equal(0);
       //sort
-      space = mocker.sortGroup(space.id, [group2.id, group1.id, group3.id])[0];
-      expect(space.groupIds).to.eql([group2.id, group1.id, group3.id]);
+      space = mocker.sortGroup(space.id, ['3', '2', '1']);
+      expect(_.pluck(space.groups, 'id')).to.eql(['3', '2', '1']);
       expect(spy.callCount).to.equal(1);
     });
   });
