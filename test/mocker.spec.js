@@ -36,7 +36,7 @@ describe('mocker', function(){
     });
   });
 
-  ddescribe('space op', function(){
+  describe('space op', function(){
     var mocker;
     var spy;
     beforeEach(function(){
@@ -127,13 +127,13 @@ describe('mocker', function(){
     var spy;
     beforeEach(function () {
       mocker = new Mocker();
-      space = mocker.addSpace('test');
+      space = mocker.updateSpace({path: 'test'});
       spy = sinon.stub(mocker, 'refreshRouter');
     });
 
     it('should add', function () {
-      var group1 = mocker.addGroup(space.id, 'group1');
-      var group2 = mocker.addGroup(space.id, 'group2');
+      var group1 = mocker.updateGroup(space.id, {name: 'group1'});
+      var group2 = mocker.updateGroup(space.id, {name: 'group2'});
       expect(group1).to.deep.equal({id: '1', name: 'group1', ruleIds: []});
       expect(space.groupIds).to.deep.equal([group1.id, group2.id]);
       //with index
