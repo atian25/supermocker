@@ -18,9 +18,9 @@ app.controller('mainCtrl', ['$http', function($http){
     vm.currentSpace = item || vm.spaceList[0];
     if(vm.currentSpace) {
       $http.get('/space/' + vm.currentSpace.id).success(function (data){
-        vm.currentGroups = data.groups;
-        vm.currentRules = data.rules;
-        vm.editRule(vm.currentRules[0][0], vm.currentGroups[0], 0);
+        var group = vm.currentSpace.groups[0];
+        var rule = group && group.rules && group.rules[0]
+        vm.editRule(rule, group, 0);
       });
     }
   };
@@ -110,16 +110,11 @@ app.controller('mainCtrl', ['$http', function($http){
       vm.currentRule.path = vm.currentRule.path.substring(1);
     }
     var skipKey = _.difference(vm.allRuleFields, vm.currentRuleType.fields);
-    var obj = {
-      groupId: vm.currentGroup.id,
-      rule: _.omit(vm.currentRule, skipKey)
-    };
-    $http.post('/rule/' + (obj.rule.id || ''), obj).success(function(response){
-      var ruleList = vm.currentRules[vm.groupIndex];
+    var obj = _.omit(vm.currentRule, skipKey);
+    $http.post('/space/' + vm.currentSpace.id + '/group/' + vm.currentGroup.id + '/rule/' + (obj.id || ''), {rule: obj}).success(function(response){
+      var ruleList = vm.currentGroup.rules;
       if(!vm.currentRule.id){
         ruleList.push(response);
-        vm.currentGroups[vm.groupIndex].ruleIds.push(response.id);
-        console.log(vm.currentGroups[vm.groupIndex])
       }else{
         var index = _.findIndex(ruleList, function(obj){
           return obj.id == response.id;
@@ -132,20 +127,19 @@ app.controller('mainCtrl', ['$http', function($http){
     });
   };
 
-  vm.toggleRule = function(item){
+  vm.toggleRule = function(item, ruleIndex, group, groupIndex){
     item.disabled = !item.disabled;
-    $http.post('/rule/' + (item.id || ''), {rule: item}).success(function(response){
+    $http.post('/space/' + vm.currentSpace.id + '/group/' + group.id + '/rule/' + (item.id || ''), {rule: item}).success(function(response){
       if(vm.currentRule && vm.currentRule.id == item.id){
-        vm.editRule(response);
+        vm.editRule(response, vm.currentGroup, vm.groupIndex);
       }
     });
   };
 
   vm.removeRule = function(item, index, group,  groupIndex){
-    $http.delete('/rule/' + vm.currentRule.id + '?groupId=' + group.id).success(function(data){
-      var ruleList = vm.currentRules[groupIndex];
+    $http.delete('/space/' + vm.currentSpace.id + '/group/' + group.id + '/rule/' + vm.currentRule.id).success(function(data){
+      var ruleList =group.rules;
       ruleList.splice(index, 1);
-      vm.currentGroups[groupIndex].ruleIds.splice(index, 1);
       if(vm.currentRule && vm.currentRule.id == item.id) {
         vm.editRule();
       }
@@ -158,6 +152,10 @@ app.controller('mainCtrl', ['$http', function($http){
       ruleIds: ruleIds
     }).success(function(data){
     });
+  };
+
+  vm.getDropData = function(data){
+    return data
   };
 
   vm.onDropRuleSuccess = function(data, ruleIndex, groupIndex, $event){
@@ -177,6 +175,11 @@ app.controller('mainCtrl', ['$http', function($http){
     group.ruleIds.splice(ruleIndex + 1, 0, data.id);
     vm.sortRule(group.id, group.ruleIds);
   };
+
+  vm.onDropValidate = function(data, channel){
+    console.log(data, channel)
+    return true
+  }
 
   vm.visitRule = function(item){
     var url = '/mocker/' + vm.currentSpace.path + '/' + item.path;

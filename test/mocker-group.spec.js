@@ -31,9 +31,8 @@ describe('mocker.group', function(){
 
   it('should add', function () {
     var group1 = mocker.updateGroup(space.id, {name: 'group1'});
-    var group2 = mocker.updateGroup(space.id, {});
     expect(group1).to.deep.equal({id: '1', name: 'group1', rules: []});
-    expect(group2).to.be.falsy;
+    expect(function(){mocker.updateGroup(space.id, {})}).to.throw(Error);
     expect(spy.callCount).to.equal(1);
   });
 

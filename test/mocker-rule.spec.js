@@ -58,4 +58,52 @@ describe('mocker.rule', function(){
     expect(_.pluck(group.rules, 'id')).to.deep.equal([rule2.id]);
     expect(spy.callCount).to.equal(1);
   });
+
+  describe('move', function(){
+    var rule1, rule2, space2, group2;
+    beforeEach(function(){
+      space2 = mocker.updateSpace({path: 'test2'});
+      group2 = mocker.updateGroup(space2.id, {name: 'group2'});
+      rule1 = mocker.updateRule(space.id, group.id, {path: 'rule1'});
+      rule2 = mocker.updateRule(space.id, group.id, {path: 'rule2', method: 'post'});
+      rule3 = mocker.updateRule(space.id, group.id, {path: 'rule3', method: 'post'});
+      spy.reset();
+    });
+
+    it('should move in same group', function(){
+      var rule = rule1;
+      var result = mocker.moveRule(space.id, group.id, rule.id, space.id, group.id, 0, false);
+      expect(result.fromGroup).to.deep.equals(group);
+      expect(result.toGroup).to.deep.equals(group);
+      expect(result.rule.path).to.deep.equals(rule.path);
+      expect(result.rule.id).to.equals(rule.id);
+      expect(_.pluck(group.rules, 'id')).to.deep.equal([rule2.id, rule3.id, rule.id]);
+      expect(spy.callCount).to.gte(1);
+    });
+
+    it('should move to other group', function(){
+      var rule = rule1;
+      var result = mocker.moveRule(space.id, group.id, rule.id, space2.id, group2.id, 0, false);
+      expect(result.fromGroup).to.deep.equals(group);
+      expect(result.toGroup).to.deep.equals(group2);
+      expect(result.rule.path).to.deep.equals(rule.path);
+      expect(result.rule.id).to.equals(rule.id);
+      expect(_.pluck(group.rules, 'id')).to.deep.equal([rule2.id, rule3.id]);
+      expect(_.pluck(group2.rules, 'id')).to.deep.equal([rule.id]);
+      expect(spy.callCount).to.gte(1);
+    });
+
+    it('should copy in other group', function(){
+      var rule = rule1;
+      var result = mocker.moveRule(space.id, group.id, rule.id, space2.id, group2.id, 0, true);
+      expect(result.fromGroup).to.deep.equals(group);
+      expect(result.toGroup).to.deep.equals(group2);
+      expect(result.rule.path).to.deep.equals(rule.path);
+      expect(result.rule.id).to.equals(rule.id);
+      expect(_.pluck(group.rules, 'id')).to.deep.equal([rule1.id, rule2.id, rule3.id]);
+      expect(_.pluck(group2.rules, 'id')).to.deep.equal([rule.id]);
+      expect(spy.callCount).to.gte(1);
+    });
+  });
+
 });

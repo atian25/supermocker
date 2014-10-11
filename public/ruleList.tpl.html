@@ -1,4 +1,4 @@
-<div ng-repeat="group in vm.currentGroups" ng-init="groupIndex = $index">
+<div ng-repeat="group in vm.currentSpace.groups" ng-init="groupIndex = $index">
   <div class="panel panel-info">
     <div class="panel-heading" ng-click="isCollapsed=!isCollapsed">
       <span class="glyphicon glyphicon-folder-close"></span> {{group.name}}
@@ -14,15 +14,16 @@
 
     <ul class="list-group" collapse="isCollapsed">
       <li class="list-group-item"
-          ng-if="vm.currentRules[groupIndex].length ===0"
+          ng-if="group.rules.length ===0"
           ui-on-drop="vm.onDropRule($data, 0, groupIndex, $event)">
         <span class="text-muted">Empty</span>
       </li>
       <li class="list-group-item"
-          ng-repeat="item in vm.currentRules[groupIndex]"
+          ng-repeat="item in group.rules"
           ng-click="vm.editRule(item, group, groupIndex);"
-          ng-class="{'active': vm.currentRule.id == item.id}"
-          ui-draggable="true" drag="item"
+          ng-class="{'active': vm.currentRule.id == item.id && vm.currentGroup.id == group.id}"
+          ng-init="dragData={rule: item, ruleIndex: index, group: group, groupIndex: groupIndex}"
+          ui-draggable="true" drag="dragData"
           on-drop-success="vm.onDropRuleSuccess($data, $index, groupIndex, $event)"
           ui-on-drop="vm.onDropRule($data, $index, groupIndex, $event)"
           drag-hover-class="list-group-item-info"

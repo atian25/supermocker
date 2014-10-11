@@ -33,9 +33,10 @@ describe('mocker.space', function(){
 
   it('should add', function(){
     var space1 = mocker.updateSpace({path: 'test', description: 'des'});
-    var space2 = mocker.updateSpace({path: 'test', description: 'des2'});
     expect(space1).to.deep.equal({id: '1', path: 'test', "description": "des", groups: []});
-    expect(space2).to.be.falsy;
+    expect(function(){
+      mocker.updateSpace({path: 'test', description: 'des2'})
+    }).to.throw(Error);
     expect(spy.callCount).to.equal(1);
   });
 
@@ -44,8 +45,9 @@ describe('mocker.space', function(){
     var space2 = mocker.updateSpace({path: 'test2', description: 'des2'});
 
     //space's path is not allow to duplicate
-    var space11 = mocker.updateSpace({id: '1', path: 'test2', description: 'des'});
-    expect(space11).to.be.falsy;
+    expect(function(){
+      mocker.updateSpace({id: '1', path: 'test2', description: 'des'});
+    }).to.throw(Error);
     expect(spy.callCount).to.equal(2);
 
     //change path
@@ -88,9 +90,11 @@ describe('mocker.space', function(){
     mocker.updateGroup(space.id, {name:'group3'});
     spy.reset();
     //no allow to change
-    var space2 = mocker.sortGroup(space.id, ['3', '2']);
+    expect(function(){
+      mocker.sortGroup(space.id, ['3', '2']);
+    }).to.throw(Error);
     expect(_.pluck(space.groups, 'id')).to.eql(['1', '2', '3']);
-    expect(space2).to.be.falsy;
+
     expect(spy.callCount).to.equal(0);
     //sort
     space = mocker.sortGroup(space.id, ['3', '2', '1']);
