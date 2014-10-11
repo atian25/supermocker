@@ -11,7 +11,7 @@ var xdescribe = describe.skip;
 var iit = it.only;
 var xit = it.skip;
 
-ddescribe('mocker.rule', function(){
+describe('mocker.rule', function(){
   var mocker;
   var spy;
   var space;
